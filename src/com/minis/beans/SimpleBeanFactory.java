@@ -1,12 +1,11 @@
-package com.minis.core;
+package com.minis.beans;
 
-import com.minis.beans.BeanDefinition;
 import com.minis.exception.BeansException;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class XmlBeanFactory implements BeanFactory {
+public class SimpleBeanFactory implements BeanFactory {
 
     private Map<String, BeanDefinition> beanDefinitions = new HashMap<>();
     private Map<String, Object> singletons = new HashMap<>();

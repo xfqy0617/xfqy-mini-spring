@@ -1,4 +1,4 @@
-package com.minis.core;
+package com.minis.beans;
 
 import com.minis.exception.BeansException;
 

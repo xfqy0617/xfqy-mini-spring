@@ -1,4 +1,4 @@
-package com.minis.test;
+package com.test;
 
 import com.minis.context.ClassPathXmlApplicationContext;
 import com.minis.exception.BeansException;
