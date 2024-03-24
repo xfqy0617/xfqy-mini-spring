@@ -9,9 +9,9 @@ import java.net.URL;
 import java.util.Iterator;
 
 public class ClassPathXmlResource implements Resource {
-    private Document document;
-    private Element rootElement;
-    private Iterator<Element> elementIterator;
+    private final Document document;
+    private final Element rootElement;
+    private final Iterator<Element> elementIterator;
 
     public ClassPathXmlResource(String fileName) {
         SAXReader saxReader = new SAXReader();

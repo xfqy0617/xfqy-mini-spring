@@ -7,7 +7,7 @@ import com.minis.core.*;
 import com.minis.exception.BeansException;
 
 public class ClassPathXmlApplicationContext implements BeanFactory {
-    private BeanFactory beanFactory;
+    private final SimpleBeanFactory beanFactory;
 
     public ClassPathXmlApplicationContext(String fileName) {
         beanFactory = new SimpleBeanFactory();
@@ -22,7 +22,27 @@ public class ClassPathXmlApplicationContext implements BeanFactory {
     }
 
     @Override
-    public void registerBeanDefinition(String id, String className) {
-        beanFactory.registerBeanDefinition(id, className);
+    public boolean containsBean(String name) {
+        return beanFactory.containsBean(name);
+    }
+
+    @Override
+    public void registerBean(String id, Object o) {
+        beanFactory.registerBean(id, o);
+    }
+
+    @Override
+    public boolean isSingleton(String name) {
+        return beanFactory.isSingleton(name);
+    }
+
+    @Override
+    public boolean isPrototype(String name) {
+        return beanFactory.isPrototype(name);
+    }
+
+    @Override
+    public Class<?> getType(String name) {
+        return beanFactory.getType(name);
     }
 }
