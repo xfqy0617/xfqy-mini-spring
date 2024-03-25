@@ -83,114 +83,94 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
 
     private Object createBean(BeanDefinition bd) {
         Class<?> clz = null;
-        Object object = null;
-        Constructor<?> constructor = null;
+        Object obj = null;
 
         try {
             clz = Class.forName(bd.getClassName());
 
             //handle constructor
-            ArgumentValues argumentValues = bd.getConstructorArgumentValues();
-            if (!argumentValues.isEmpty()) {
-                Class<?>[] paramTypes = new Class<?>[argumentValues.getArgumentCount()];
-                Object[] paramValues = new Object[argumentValues.getArgumentCount()];
-                // 组装构造方法参数类型列表及参数列表
-                for (int i = 0; i < argumentValues.getArgumentCount(); i++) {
-                    ArgumentValue argumentValue = argumentValues.getIndexedArgumentValue(i);
-//                    if (String.class.getSimpleName().equals(argumentValue.getType()) || String.class.getName().equals(argumentValue.getType())) {
-//                        paramTypes[i] = String.class;
-//                        paramValues[i] = argumentValue.getValue();
-//                    } else
+            obj = handleConstructor(bd, clz);
 
-                    if (Integer.class.getSimpleName().equals(argumentValue.getType()) || Integer.class.getName().equals(argumentValue.getType())) {
-                        paramTypes[i] = Integer.class;
-                        paramValues[i] = Integer.valueOf((String) argumentValue.getValue());
-                    } else if (int.class.getName().equals(argumentValue.getType())) {
-                        paramTypes[i] = int.class;
-                        paramValues[i] = Integer.valueOf((String) argumentValue.getValue());
-                    } else {
-                        paramTypes[i] = String.class;
-                        paramValues[i] = argumentValue.getValue();
-                    }
-                }
+            //handle properties
+            handleProperties(bd, clz, obj);
 
-                try {
-                    constructor = clz.getConstructor(paramTypes);
-                    object = constructor.newInstance(paramValues);
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
-                } catch (SecurityException e) {
-                    e.printStackTrace();
-                } catch (IllegalArgumentException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                object = clz.newInstance();
-            }
-
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
-        //handle properties
-        PropertyValues propertyValues = bd.getPropertyValues();
-        if (!propertyValues.isEmpty()) {
-            for (int i = 0; i < propertyValues.size(); i++) {
-                PropertyValue propertyValue = propertyValues.getPropertyValueList().get(i);
-                String pName = propertyValue.getName();
-                String pType = propertyValue.getType();
-                Object pValue = propertyValue.getValue();
 
-                Class<?>[] paramTypes = new Class<?>[1];
-                if (String.class.getSimpleName().equals(pType) || String.class.getName().equals(pType)) {
-                    paramTypes[0] = String.class;
-                } else if (Integer.class.getSimpleName().equals(pType) || Integer.class.getName().equals(pType)) {
-                    paramTypes[0] = Integer.class;
-                } else if (int.class.getName().equals(pType)) {
-                    paramTypes[0] = int.class;
-                } else {
-                    paramTypes[0] = String.class;
-                }
-
-                Object[] paramValues = new Object[1];
-                paramValues[0] = pValue;
-
-                String methodName = "set" + pName.substring(0, 1).toUpperCase() + pName.substring(1);
-
-                Method method = null;
-                try {
-                    method = clz.getMethod(methodName, paramTypes);
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
-                } catch (SecurityException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    method.invoke(object, paramValues);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (IllegalArgumentException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        }
-
-
-        return object;
+        return obj;
 
     }
 
+    private Object handleConstructor(BeanDefinition bd, Class<?> clz) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+        Constructor<?> constructor;
+        Object obj;
+        ArgumentValues avs = bd.getConstructorArgumentValues();
+        if (!avs.isEmpty()) {
+            // 参数类型列表
+            Class<?>[] paramTypes = new Class<?>[avs.getArgumentCount()];
+            // 参数值列表
+            Object[] paramValues = new Object[avs.getArgumentCount()];
+            // 组装构造方法参数类型列表及参数列表
+            for (int i = 0; i < avs.getArgumentCount(); i++) {
+                ArgumentValue argumentValue = avs.getIndexedArgumentValue(i);
+                if (Integer.class.getSimpleName().equals(argumentValue.getType()) || Integer.class.getName().equals(argumentValue.getType())) {
+                    paramTypes[i] = Integer.class;
+                    paramValues[i] = Integer.valueOf((String) argumentValue.getValue());
+                } else if (int.class.getName().equals(argumentValue.getType())) {
+                    paramTypes[i] = int.class;
+                    paramValues[i] = Integer.valueOf((String) argumentValue.getValue());
+                } else {
+                    paramTypes[i] = String.class;
+                    paramValues[i] = argumentValue.getValue();
+                }
+            }
+            constructor = clz.getConstructor(paramTypes);
+            obj = constructor.newInstance(paramValues);
+        } else {
+            obj = clz.newInstance();
+        }
+        return obj;
+    }
 
+    private void handleProperties(BeanDefinition bd, Class<?> clz, Object obj) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, ClassNotFoundException {
+        //handle properties
+        System.out.println("handle properties for bean : " + bd.getBeanName());
+        PropertyValues pvs = bd.getPropertyValues();
+        if (!pvs.isEmpty()) {
+            for (int i = 0; i < pvs.size(); i++) {
+                PropertyValue pv = pvs.getPropertyValueList().get(i);
+                String pName = pv.getName();
+                String pType = pv.getType();
+                Object pValue = pv.getValue();
+                boolean isRef = pv.isRef();
+                Class<?> type;
+                Object val;
+                if (!isRef) {
+                    if ("String".equals(pType) || "java.lang.String".equals(pType)) {
+                        type = String.class;
+                    } else if ("Integer".equals(pType) || "java.lang.Integer".equals(pType)) {
+                        type = Integer.class;
+                    } else if ("int".equals(pType)) {
+                        type = int.class;
+                    } else {
+                        type = String.class;
+                    }
+                    val = pValue;
+                } else {
+                    // is ref, create the dependent beans
+                    type = Class.forName(pType);
+                    val = getBean((String) pValue);
+                }
 
+                String methodName = "set" + pName.substring(0, 1).toUpperCase() + pName.substring(1);
+                Method method = clz.getMethod(methodName, type);
+                method.invoke(obj, val);
+            }
+        }
+
+    }
 
 
 }

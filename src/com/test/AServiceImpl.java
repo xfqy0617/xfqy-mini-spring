@@ -6,6 +6,8 @@ public class AServiceImpl implements AService {
     private int level;
     private String property1;
     private String property2;
+    private BaseService ref1;
+
 
     public AServiceImpl() {
     }
@@ -19,7 +21,7 @@ public class AServiceImpl implements AService {
 
     @Override
     public void sayHello() {
-        System.out.println("! TEST ! hello, I am AServiceImpl");
+        System.out.println("! TEST ! hello, I am AServiceImpl " + property1 + ", " + property2);
     }
 
     public String getProperty1() {
@@ -36,6 +38,14 @@ public class AServiceImpl implements AService {
 
     public void setProperty2(String property2) {
         this.property2 = property2;
+    }
+
+    public BaseService getRef1() {
+        return ref1;
+    }
+
+    public void setRef1(BaseService ref1) {
+        this.ref1 = ref1;
     }
 
     @Override

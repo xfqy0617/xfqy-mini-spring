@@ -10,9 +10,13 @@ public class ClassPathXmlApplicationContext implements BeanFactory {
     private final SimpleBeanFactory beanFactory;
 
     public ClassPathXmlApplicationContext(String fileName) {
+        // 创建一个最简单的bean工厂
         beanFactory = new SimpleBeanFactory();
+        // 从xml中获取bean相关的资源
         Resource resource = new ClassPathXmlResource(fileName);
+        // 创建一个xml资源的读取器
         XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
+        // 加载资源到容器中
         reader.loadBeanDefinition(resource);
     }
 
