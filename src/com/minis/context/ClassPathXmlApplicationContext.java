@@ -1,13 +1,17 @@
 package com.minis.context;
 
-import com.minis.beans.*;
-import com.minis.beans.factory.support.SimpleBeanFactory;
+import com.minis.beans.ApplicationEvent;
+import com.minis.beans.ApplicationEventPublisher;
+import com.minis.beans.BeanFactory;
+import com.minis.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import com.minis.beans.factory.support.AutowireCapableBeanFactory;
 import com.minis.beans.factory.xml.XmlBeanDefinitionReader;
-import com.minis.core.*;
+import com.minis.core.ClassPathXmlResource;
+import com.minis.core.Resource;
 import com.minis.exception.BeansException;
 
 public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationEventPublisher {
-    private final SimpleBeanFactory beanFactory;
+    private final AutowireCapableBeanFactory beanFactory;
 
     public ClassPathXmlApplicationContext(String fileName) {
         this(fileName, true);
@@ -15,7 +19,9 @@ public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationE
 
     public ClassPathXmlApplicationContext(String fileName, boolean isRefresh) {
         // 创建一个最简单的bean工厂
-        beanFactory = new SimpleBeanFactory();
+        beanFactory = new AutowireCapableBeanFactory();
+        // 添加一个注解处理器
+        beanFactory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
         // 从xml中获取bean相关的资源
         Resource resource = new ClassPathXmlResource(fileName);
         // 创建一个xml资源的读取器
@@ -23,8 +29,12 @@ public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationE
         // 加载资源到容器中
         reader.loadBeanDefinition(resource);
         if (isRefresh) {
-            beanFactory.refresh();
+            refresh();
         }
+    }
+
+    private void refresh() {
+        beanFactory.refresh();
     }
 
     @Override

@@ -1,11 +1,12 @@
 package com.minis.beans.factory.xml;
 
 
-import com.minis.beans.*;
+import com.minis.beans.PropertyValue;
+import com.minis.beans.PropertyValues;
 import com.minis.beans.factory.config.BeanDefinition;
 import com.minis.beans.factory.config.ConstructorArgumentValue;
 import com.minis.beans.factory.config.ConstructorArgumentValues;
-import com.minis.beans.factory.support.SimpleBeanFactory;
+import com.minis.beans.factory.support.AbstractBeanFactory;
 import com.minis.core.Resource;
 import com.minis.util.StringUtils;
 import org.dom4j.Element;
@@ -22,10 +23,10 @@ public class XmlBeanDefinitionReader {
     private static final String REF = "ref";
     private static final String PROPERTY = "property";
     private static final String CONSTRUCTOR_ARG = "constructor-arg";
-    private final SimpleBeanFactory simpleBeanFactory;
+    private final AbstractBeanFactory beanFactory;
 
-    public XmlBeanDefinitionReader(SimpleBeanFactory simpleBeanFactory) {
-        this.simpleBeanFactory = simpleBeanFactory;
+    public XmlBeanDefinitionReader(AbstractBeanFactory beanFactory) {
+        this.beanFactory = beanFactory;
     }
 
     public void loadBeanDefinition(Resource resource) {
@@ -66,10 +67,13 @@ public class XmlBeanDefinitionReader {
                 avs.addArgumentValue(new ConstructorArgumentValue(type, name, val));
             }
             beanDefinition.setConstructorArgumentValues(avs);
-            simpleBeanFactory.registerBeanDefinition(beanDefinition);
+            beanFactory.registerBeanDefinition(beanDefinition);
         }
+        beanFactory.initBeans();
+    }
 
-        simpleBeanFactory.initBeans();
+    private void onRefresh() {
+        beanFactory.refresh();
     }
 
 }

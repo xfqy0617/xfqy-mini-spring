@@ -7,6 +7,7 @@ import com.minis.beans.factory.config.BeanDefinition;
 import com.minis.beans.factory.config.BeanPostProcessor;
 import com.minis.beans.factory.config.ConstructorArgumentValue;
 import com.minis.beans.factory.config.ConstructorArgumentValues;
+import com.minis.util.StringUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -23,6 +24,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
     private final Map<String, Object> earlySingletonObjects = new ConcurrentHashMap<>();
     private final List<String> beanDefinitionNames = new ArrayList<>();
 
+    protected abstract List<? extends BeanPostProcessor> getBeanPostProcessors();
 
     @Override
     public Object getBean(String beanName) {
@@ -40,9 +42,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
                 applyBeanPostProcessorBeforeInitialization(singleton, beanName);
 
                 // step 2: init-method
-                if (beanDefinition.getInitMethodName() != null && !beanDefinition.getInitMethodName().equals("")) {
-                    invokeInitMethod(beanDefinition, singleton);
-                }
+                invokeInitMethod(beanDefinition, singleton);
 
                 // step 3: afterPropertiesSet
 
@@ -66,9 +66,25 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
     }
 
-    private void invokeInitMethod(BeanDefinition beanDefinition, Object singleton) {
+    /**
+     * 调用初始化方法
+     */
+    private void invokeInitMethod(BeanDefinition beanDefinition, Object obj) {
+        String initMethodName = beanDefinition.getInitMethodName();
+        Class<?> clz = beanDefinition.getClass();
+        if (StringUtils.isEmpty(initMethodName)) {
+            return;
+        }
 
+        Method method;
+        try {
+            method = clz.getMethod(initMethodName);
+            method.invoke(obj);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
 
     private Object applyBeanPostProcessorBeforeInitialization(Object singleton, String beanName) {
         for (BeanPostProcessor beanProcessor : getBeanPostProcessors()) {
@@ -81,7 +97,6 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         return singleton;
     }
 
-    protected abstract BeanPostProcessor[] getBeanPostProcessors();
 
     @Override
     public boolean containsBean(String name) {

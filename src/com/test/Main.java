@@ -9,7 +9,7 @@ public class Main {
         AServiceImpl aService = (AServiceImpl) context.getBean("aService");
         aService.sayHello();
         aService.getRef1().hello();
-        aService.getRef1().getBbs().hello();
+        aService.getRef1().getBaseBaseService().hello();
         System.out.println(aService);
     }
 }
