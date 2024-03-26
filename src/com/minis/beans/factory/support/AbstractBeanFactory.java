@@ -1,4 +1,12 @@
-package com.minis.beans;
+package com.minis.beans.factory.support;
+
+import com.minis.beans.BeanFactory;
+import com.minis.beans.PropertyValue;
+import com.minis.beans.PropertyValues;
+import com.minis.beans.factory.config.BeanDefinition;
+import com.minis.beans.factory.config.BeanPostProcessor;
+import com.minis.beans.factory.config.ConstructorArgumentValue;
+import com.minis.beans.factory.config.ConstructorArgumentValues;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -8,7 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements BeanFactory {
+public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements BeanFactory, BeanDefinitionRegistry {
 
     private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>();
     // 初始化实例缓存
@@ -29,14 +37,51 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
                 registerSingleton(beanName, singleton);
                 // 预留bean post processor位置
                 // step 1: postProcessBeforeInitialization
-                // step 2: afterPropertiesSet
-                // step 3: init-method
+                applyBeanPostProcessorBeforeInitialization(singleton, beanName);
+
+                // step 2: init-method
+                if (beanDefinition.getInitMethodName() != null && !beanDefinition.getInitMethodName().equals("")) {
+                    invokeInitMethod(beanDefinition, singleton);
+                }
+
+                // step 3: afterPropertiesSet
+
                 // step 4: postProcessAfterInitialization
+                applyBeanPostProcessorAfterInitialization(singleton, beanName);
             }
         }
 
         return singleton;
     }
+
+    protected Object applyBeanPostProcessorAfterInitialization(Object singleton, String beanName) {
+        for (BeanPostProcessor beanProcessor : getBeanPostProcessors()) {
+            beanProcessor.setBeanFactory(this);
+            singleton = beanProcessor.postProcessAfterInitialization(singleton, beanName);
+            if (singleton == null) {
+                return null;
+            }
+        }
+        return singleton;
+
+    }
+
+    private void invokeInitMethod(BeanDefinition beanDefinition, Object singleton) {
+
+    }
+
+    private Object applyBeanPostProcessorBeforeInitialization(Object singleton, String beanName) {
+        for (BeanPostProcessor beanProcessor : getBeanPostProcessors()) {
+            beanProcessor.setBeanFactory(this);
+            singleton = beanProcessor.postProcessBeforeInitialization(singleton, beanName);
+            if (singleton == null) {
+                return null;
+            }
+        }
+        return singleton;
+    }
+
+    protected abstract BeanPostProcessor[] getBeanPostProcessors();
 
     @Override
     public boolean containsBean(String name) {
@@ -66,20 +111,28 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
         return bean.getClass();
     }
 
+    @Override
     public void registerBeanDefinition(BeanDefinition beanDefinition) {
         String beanName = beanDefinition.getBeanName();
         beanDefinitionMap.put(beanName, beanDefinition);
         beanDefinitionNames.add(beanName);
     }
 
+    @Override
     public void removeBeanDefinition(String name) {
         beanDefinitionMap.remove(name);
         beanDefinitionNames.remove(name);
         this.removeSingleton(name);
     }
 
+    @Override
     public BeanDefinition getBeanDefinition(String name) {
         return beanDefinitionMap.get(name);
+    }
+
+    @Override
+    public boolean containsBeanDefinition(String name) {
+        return beanDefinitionMap.containsKey(name);
     }
 
     private Object createBean(BeanDefinition bd) {
@@ -109,7 +162,7 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
         Object obj = null;
         try {
             Class<?> clz = Class.forName(bd.getClassName());
-            ArgumentValues avs = bd.getConstructorArgumentValues();
+            ConstructorArgumentValues avs = bd.getConstructorArgumentValues();
             if (!avs.isEmpty()) {
                 // 参数类型列表
                 Class<?>[] paramTypes = new Class<?>[avs.getArgumentCount()];
@@ -117,16 +170,16 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
                 Object[] paramValues = new Object[avs.getArgumentCount()];
                 // 组装构造方法参数类型列表及参数列表
                 for (int i = 0; i < avs.getArgumentCount(); i++) {
-                    ArgumentValue argumentValue = avs.getIndexedArgumentValue(i);
-                    if (Integer.class.getSimpleName().equals(argumentValue.getType()) || Integer.class.getName().equals(argumentValue.getType())) {
+                    ConstructorArgumentValue cav = avs.getIndexedArgumentValue(i);
+                    if (Integer.class.getSimpleName().equals(cav.getType()) || Integer.class.getName().equals(cav.getType())) {
                         paramTypes[i] = Integer.class;
-                        paramValues[i] = Integer.valueOf((String) argumentValue.getValue());
-                    } else if (int.class.getName().equals(argumentValue.getType())) {
+                        paramValues[i] = Integer.valueOf((String) cav.getValue());
+                    } else if (int.class.getName().equals(cav.getType())) {
                         paramTypes[i] = int.class;
-                        paramValues[i] = Integer.valueOf((String) argumentValue.getValue());
+                        paramValues[i] = Integer.valueOf((String) cav.getValue());
                     } else {
                         paramTypes[i] = String.class;
-                        paramValues[i] = argumentValue.getValue();
+                        paramValues[i] = cav.getValue();
                     }
                 }
                 constructor = clz.getConstructor(paramTypes);
@@ -185,6 +238,7 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
         }
 
     }
+
     public void refresh() {
         for (String beanName : beanDefinitionNames) {
             getBean(beanName);

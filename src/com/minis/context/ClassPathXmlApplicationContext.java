@@ -1,6 +1,8 @@
 package com.minis.context;
 
 import com.minis.beans.*;
+import com.minis.beans.factory.support.SimpleBeanFactory;
+import com.minis.beans.factory.xml.XmlBeanDefinitionReader;
 import com.minis.core.*;
 import com.minis.exception.BeansException;
 

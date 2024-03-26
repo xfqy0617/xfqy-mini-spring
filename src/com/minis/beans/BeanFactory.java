@@ -4,11 +4,11 @@ import com.minis.exception.BeansException;
 
 public interface BeanFactory {
 
-    Object getBean(String id) throws BeansException;
+    Object getBean(String beanName) throws BeansException;
 
     boolean containsBean(String name);
 
-    void registerBean(String id, Object o);
+    void registerBean(String beanName, Object o);
 
     boolean isSingleton(String name);
 

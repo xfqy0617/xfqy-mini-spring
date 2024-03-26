@@ -1,4 +1,6 @@
-package com.minis.beans;
+package com.minis.beans.factory.config;
+
+import com.minis.beans.PropertyValues;
 
 public class BeanDefinition {
     public static final String SCOPE_SINGLETON = "singleton";
@@ -12,9 +14,19 @@ public class BeanDefinition {
      * 懒加载
      */
     private boolean lazyInit = false;
+    /**
+     * 依赖的bean
+     */
     private String[] dependsOn;
-    private ArgumentValues constructorArgumentValues;
+    /**
+     * 构造器
+     */
+    private ConstructorArgumentValues constructorArgumentValues;
+    /**
+     * setter注入
+     */
     private PropertyValues propertyValues;
+
     private String initMethodName;
     private volatile Object beanClass;
 
@@ -47,11 +59,11 @@ public class BeanDefinition {
         this.dependsOn = dependsOn;
     }
 
-    public ArgumentValues getConstructorArgumentValues() {
+    public ConstructorArgumentValues getConstructorArgumentValues() {
         return constructorArgumentValues;
     }
 
-    public void setConstructorArgumentValues(ArgumentValues constructorArgumentValues) {
+    public void setConstructorArgumentValues(ConstructorArgumentValues constructorArgumentValues) {
         this.constructorArgumentValues = constructorArgumentValues;
     }
 
