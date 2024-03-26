@@ -1,15 +1,13 @@
 package com.minis.context;
 
-import com.minis.beans.XmlBeanDefinitionReader;
-import com.minis.beans.BeanFactory;
-import com.minis.beans.SimpleBeanFactory;
+import com.minis.beans.*;
 import com.minis.core.*;
 import com.minis.exception.BeansException;
 
-public class ClassPathXmlApplicationContext implements BeanFactory {
+public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationEventPublisher {
     private final SimpleBeanFactory beanFactory;
 
-    public ClassPathXmlApplicationContext(String fileName) {
+    public ClassPathXmlApplicationContext(String fileName, boolean isRefresh) {
         // 创建一个最简单的bean工厂
         beanFactory = new SimpleBeanFactory();
         // 从xml中获取bean相关的资源
@@ -18,6 +16,9 @@ public class ClassPathXmlApplicationContext implements BeanFactory {
         XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
         // 加载资源到容器中
         reader.loadBeanDefinition(resource);
+        if (isRefresh) {
+            beanFactory.refresh();
+        }
     }
 
     @Override
@@ -48,5 +49,10 @@ public class ClassPathXmlApplicationContext implements BeanFactory {
     @Override
     public Class<?> getType(String name) {
         return beanFactory.getType(name);
+    }
+
+    @Override
+    public void publishEvent(ApplicationEvent event) {
+
     }
 }
