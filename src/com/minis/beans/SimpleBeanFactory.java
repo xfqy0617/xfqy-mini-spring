@@ -70,9 +70,6 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
         String beanName = beanDefinition.getBeanName();
         beanDefinitionMap.put(beanName, beanDefinition);
         beanDefinitionNames.add(beanName);
-        if (!beanDefinition.isLazyInit()) {
-            getBean(beanName);
-        }
     }
 
     public void removeBeanDefinition(String name) {
@@ -96,6 +93,11 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
             e.printStackTrace();
         }
 
+        /*
+         * 假设A,B循环依赖, A先初始化, 然后调用handleProperties注入B
+         * 此时B开始初始化, 然后调用handleProperties注入A, 然而A已经添加到初始化缓存中, 故能获取到A的对象, B实例化完成并返回
+         * A将B注入到自己的成员变量中, A初始化完成
+         */
         handleProperties(bd, clz, obj);
         return obj;
 
@@ -140,7 +142,7 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
 
     private void handleProperties(BeanDefinition bd, Class<?> clz, Object obj) {
         //handle properties
-        System.out.println("handle properties for bean : " + bd.getBeanName());
+        System.out.println("处理bean的字段注入: " + bd.getBeanName());
         PropertyValues pvs = bd.getPropertyValues();
         if (!pvs.isEmpty()) {
             for (int i = 0; i < pvs.size(); i++) {
@@ -186,6 +188,14 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
     public void refresh() {
         for (String beanName : beanDefinitionNames) {
             getBean(beanName);
+        }
+    }
+
+    public void initBeans() {
+        for (BeanDefinition bd : beanDefinitionMap.values()) {
+            if (!bd.isLazyInit()) {
+                getBean(bd.getBeanName());
+            }
         }
     }
 

@@ -11,7 +11,7 @@ public class BeanDefinition {
     /**
      * 懒加载
      */
-    private boolean lazyInit = true;
+    private boolean lazyInit = false;
     private String[] dependsOn;
     private ArgumentValues constructorArgumentValues;
     private PropertyValues propertyValues;

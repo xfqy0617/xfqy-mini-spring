@@ -2,6 +2,13 @@
 
 <beans>
 
+    <bean id="baseBaseService" class="com.test.BaseBaseService">
+        <property type="com.test.AService" name="as" ref="aService" />
+    </bean>
+
+    <bean id="baseService" class="com.test.BaseService">
+        <property type="com.test.BaseBaseService" name="bbs" ref="baseBaseService" />
+    </bean>
 
     <bean id="aService" class="com.test.AServiceImpl">
         <constructor-arg type="String" name="name" value="abc"/>
@@ -11,12 +18,5 @@
         <property type="com.test.BaseService" name="ref1" ref="baseService"/>
     </bean>
 
-    <bean id="baseBaseService" class="com.test.BaseBaseService">
-        <property type="com.test.AService" name="as" ref="aService" />
-    </bean>
-
-    <bean id="baseService" class="com.test.BaseService">
-        <property type="com.test.BaseBaseService" name="bbs" ref="baseBaseService" />
-    </bean>
 
 </beans>

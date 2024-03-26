@@ -7,6 +7,10 @@ import com.minis.exception.BeansException;
 public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationEventPublisher {
     private final SimpleBeanFactory beanFactory;
 
+    public ClassPathXmlApplicationContext(String fileName) {
+        this(fileName, true);
+    }
+
     public ClassPathXmlApplicationContext(String fileName, boolean isRefresh) {
         // 创建一个最简单的bean工厂
         beanFactory = new SimpleBeanFactory();
