@@ -20,7 +20,7 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
         if (singleton == null) {
             BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
             if (beanDefinition == null) {
-                throw new BeansException("can not found bean" + beanName);
+                throw new BeansException("can not found bean [" + beanName + "]");
             }
 
             try {
