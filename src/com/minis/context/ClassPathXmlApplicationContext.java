@@ -1,21 +1,23 @@
 package com.minis.context;
 
-import com.minis.beans.ApplicationEvent;
-import com.minis.beans.ApplicationEventPublisher;
-import com.minis.beans.factory.BeanFactory;
 import com.minis.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
-import com.minis.beans.factory.support.AbstractAutowireCapableBeanFactory;
+import com.minis.beans.factory.config.BeanFactoryPostProcessor;
+import com.minis.beans.factory.config.ConfigurableListableBeanFactory;
 import com.minis.beans.factory.support.DefaultListableBeanFactory;
 import com.minis.beans.factory.xml.XmlBeanDefinitionReader;
 import com.minis.core.ClassPathXmlResource;
 import com.minis.core.Resource;
-import com.minis.exception.BeansException;
+import com.minis.core.SimpleApplicationEventPublisher;
 
-public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationEventPublisher {
-    private final AbstractAutowireCapableBeanFactory beanFactory;
+import java.util.ArrayList;
+import java.util.List;
 
-    public ClassPathXmlApplicationContext(String fileName) {
-        this(fileName, true);
+public class ClassPathXmlApplicationContext extends AbstractApplicationContext {
+	DefaultListableBeanFactory beanFactory;
+	private final List<BeanFactoryPostProcessor> beanFactoryPostProcessors = new ArrayList<>();
+
+    public ClassPathXmlApplicationContext(String fileName){
+    	this(fileName, true);
     }
 
     public ClassPathXmlApplicationContext(String fileName, boolean isRefresh) {
@@ -32,44 +34,63 @@ public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationE
         if (isRefresh) {
             refresh();
         }
+
+		System.out.println("----------  xfqy mini Spring is start!  ---------- ");
+
     }
 
-    private void refresh() {
-        beanFactory.refresh();
-    }
+	@Override
+	void registerListeners() {
+		ApplicationListener listener = new ApplicationListener();
+		this.getApplicationEventPublisher().addApplicationListener(listener);
+
+	}
+
+	@Override
+	void initApplicationEventPublisher() {
+		ApplicationEventPublisher aep = new SimpleApplicationEventPublisher();
+		this.setApplicationEventPublisher(aep);
+	}
+
+	@Override
+	void postProcessBeanFactory(ConfigurableListableBeanFactory bf) {
+	}
+
+	@Override
+	void registerBeanPostProcessors(ConfigurableListableBeanFactory bf) {
+		this.beanFactory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
+	}
+
+	@Override
+	void onRefresh() {
+		this.beanFactory.refresh();
+	}
+
+	@Override
+	public ConfigurableListableBeanFactory getBeanFactory() throws IllegalStateException {
+		return this.beanFactory;
+	}
+
+	@Override
+	public void addApplicationListener(ApplicationListener listener) {
+		this.getApplicationEventPublisher().addApplicationListener(listener);
+
+	}
+
+	@Override
+	void finishRefresh() {
+		publishEvent(new ContextRefreshEvent("Context Refreshed..."));
+	}
+
+	@Override
+	public void publishEvent(ApplicationEvent event) {
+		this.getApplicationEventPublisher().publishEvent(event);
+	}
+
 
     @Override
-    public Object getBean(String id) throws BeansException {
-        return beanFactory.getBean(id);
-    }
-
-    @Override
-    public boolean containsBean(String name) {
-        return beanFactory.containsBean(name);
-    }
-
-    @Override
-    public void registerBean(String id, Object o) {
-        beanFactory.registerBean(id, o);
-    }
-
-    @Override
-    public boolean isSingleton(String name) {
-        return beanFactory.isSingleton(name);
-    }
-
-    @Override
-    public boolean isPrototype(String name) {
-        return beanFactory.isPrototype(name);
-    }
-
-    @Override
-    public Class<?> getType(String name) {
-        return beanFactory.getType(name);
-    }
-
-    @Override
-    public void publishEvent(ApplicationEvent event) {
+    public void registerBean(String beanName, Object o) {
+		beanFactory.registerBean(beanName, o);
 
     }
 }

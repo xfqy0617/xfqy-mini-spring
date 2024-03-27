@@ -1,4 +1,4 @@
-package com.minis.core;
+package com.minis.core.env;
 
 /**
  * 属性解析器

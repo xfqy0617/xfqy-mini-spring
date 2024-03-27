@@ -2,11 +2,7 @@ package com.minis.beans.factory.support;
 
 import com.minis.beans.PropertyValue;
 import com.minis.beans.PropertyValues;
-import com.minis.beans.factory.BeanFactory;
-import com.minis.beans.factory.config.BeanDefinition;
-import com.minis.beans.factory.config.BeanPostProcessor;
-import com.minis.beans.factory.config.ConstructorArgumentValue;
-import com.minis.beans.factory.config.ConstructorArgumentValues;
+import com.minis.beans.factory.config.*;
 import com.minis.util.StringUtils;
 
 import java.lang.reflect.Constructor;
@@ -17,10 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.minis.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
-import static com.minis.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON;
-
-public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements BeanFactory, BeanDefinitionRegistry, AutowireCapableBeanFactory {
+public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements ConfigurableBeanFactory, BeanDefinitionRegistry{
 
     protected final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>();
     // 初始化实例缓存
@@ -57,6 +50,10 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
         return singleton;
     }
+
+    protected abstract Object applyBeanPostProcessorsAfterInitialization(Object singleton, String beanName);
+
+    protected abstract Object applyBeanPostProcessorsBeforeInitialization(Object singleton, String beanName);
 
     /**
      * 调用初始化方法
@@ -235,14 +232,9 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
     }
 
     public void refresh() {
-        for (String beanName : beanDefinitionNames) {
-            getBean(beanName);
-        }
-    }
-
-    public void initBeans() {
         for (BeanDefinition bd : beanDefinitionMap.values()) {
-            if (!bd.isLazyInit()) {
+            boolean lazyInit = bd.isLazyInit();
+            if (!lazyInit) {
                 getBean(bd.getBeanName());
             }
         }

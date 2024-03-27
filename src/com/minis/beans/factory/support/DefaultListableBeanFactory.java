@@ -1,7 +1,7 @@
 package com.minis.beans.factory.support;
 
-import com.minis.beans.ListableBeanFactory;
 import com.minis.beans.factory.config.BeanDefinition;
+import com.minis.beans.factory.config.ConfigurableListableBeanFactory;
 import com.minis.exception.BeansException;
 
 import java.util.ArrayList;
@@ -9,22 +9,23 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory implements ListableBeanFactory {
+public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory implements ConfigurableListableBeanFactory {
     public int getBeanDefinitionCount() {
         return this.beanDefinitionMap.size();
     }
 
 
     public String[] getBeanDefinitionNames() {
-        return (String[]) this.beanDefinitionNames.toArray();
+        return this.beanDefinitionNames.toArray(new String[0]);
     }
 
 
     public String[] getBeanNamesForType(Class<?> type) {
         List<String> result = new ArrayList<>();
         for (String beanName : this.beanDefinitionNames) {
-            BeanDefinition mbd = this.getBeanDefinition(beanName);
-            Class<?> classToMatch = mbd.getClass();
+            BeanDefinition bd = this.getBeanDefinition(beanName);
+            Class<?> classToMatch = bd.getClass();
+            // 判断bean的类型是否是传入类的子类
             boolean matchFound = type.isAssignableFrom(classToMatch);
             if (matchFound) {
                 result.add(beanName);

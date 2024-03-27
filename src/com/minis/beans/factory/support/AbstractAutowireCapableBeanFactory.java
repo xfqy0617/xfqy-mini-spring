@@ -1,23 +1,31 @@
 package com.minis.beans.factory.support;
 
-import com.minis.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import com.minis.beans.factory.config.BeanPostProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory {
-    private final List<AutowiredAnnotationBeanPostProcessor> beanPostProcessors = new ArrayList<>();
+public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory implements AutowireCapableBeanFactory {
+    private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
 
     @Override
-    public List<AutowiredAnnotationBeanPostProcessor> getBeanPostProcessors() {
+    public List<BeanPostProcessor> getBeanPostProcessors() {
         return beanPostProcessors;
     }
 
-    public void addBeanPostProcessor(AutowiredAnnotationBeanPostProcessor beanPostProcessor) {
+
+    @Override
+    public int getBeanPostProcessorCount() {
+        return this.beanPostProcessors.size();
+    }
+
+
+    @Override
+    public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
         this.beanPostProcessors.remove(beanPostProcessor);
         this.beanPostProcessors.add(beanPostProcessor);
     }
+
 
     @Override
     public Object applyBeanPostProcessorsAfterInitialization(Object singleton, String beanName) {

@@ -1,5 +1,8 @@
 package com.minis.beans.factory.config;
 
+/**
+ * 单例bean注册器
+ */
 public interface SingletonBeanRegistry {
 
     /**

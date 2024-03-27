@@ -69,7 +69,6 @@ public class XmlBeanDefinitionReader {
             beanDefinition.setConstructorArgumentValues(avs);
             beanFactory.registerBeanDefinition(beanDefinition);
         }
-        beanFactory.initBeans();
     }
 
     private void onRefresh() {

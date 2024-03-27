@@ -13,6 +13,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 
     @Override
     public void registerSingleton(String beanName, Object singletonObject) {
+        System.out.println("register bean [ " + beanName + " ]");
         synchronized (this.singletons) {
             if (containsSingleton(beanName)) {
                 System.out.println("unable to register duplicate beans, bean name:" + beanName);
@@ -45,4 +46,20 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
         }
     }
 
+
+
+    public void registerDependentBean(String beanName, String dependentBeanName) {
+        // todo ddd
+
+    }
+
+    public String[] getDependentBeans(String beanName) {
+        // todo ddd
+        return new String[0];
+    }
+
+    public String[] getDependenciesForBean(String beanName) {
+        // todo ddd
+        return new String[0];
+    }
 }
