@@ -2,9 +2,9 @@ package com.minis.beans.factory.config;
 
 import com.minis.beans.PropertyValues;
 
+import static com.minis.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON;
+
 public class BeanDefinition {
-    public static final String SCOPE_SINGLETON = "singleton";
-    public static final String SCOPE_PROTOTYPE = "prototype";
 
     private final String beanName;
     private final String className;

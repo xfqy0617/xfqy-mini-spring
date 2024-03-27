@@ -2,16 +2,17 @@ package com.minis.context;
 
 import com.minis.beans.ApplicationEvent;
 import com.minis.beans.ApplicationEventPublisher;
-import com.minis.beans.BeanFactory;
+import com.minis.beans.factory.BeanFactory;
 import com.minis.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
-import com.minis.beans.factory.support.AutowireCapableBeanFactory;
+import com.minis.beans.factory.support.AbstractAutowireCapableBeanFactory;
+import com.minis.beans.factory.support.DefaultListableBeanFactory;
 import com.minis.beans.factory.xml.XmlBeanDefinitionReader;
 import com.minis.core.ClassPathXmlResource;
 import com.minis.core.Resource;
 import com.minis.exception.BeansException;
 
 public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationEventPublisher {
-    private final AutowireCapableBeanFactory beanFactory;
+    private final AbstractAutowireCapableBeanFactory beanFactory;
 
     public ClassPathXmlApplicationContext(String fileName) {
         this(fileName, true);
@@ -19,7 +20,7 @@ public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationE
 
     public ClassPathXmlApplicationContext(String fileName, boolean isRefresh) {
         // 创建一个最简单的bean工厂
-        beanFactory = new AutowireCapableBeanFactory();
+        beanFactory = new DefaultListableBeanFactory();
         // 添加一个注解处理器
         beanFactory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
         // 从xml中获取bean相关的资源

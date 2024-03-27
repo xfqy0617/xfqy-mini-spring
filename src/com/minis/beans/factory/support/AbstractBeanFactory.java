@@ -1,8 +1,8 @@
 package com.minis.beans.factory.support;
 
-import com.minis.beans.BeanFactory;
 import com.minis.beans.PropertyValue;
 import com.minis.beans.PropertyValues;
+import com.minis.beans.factory.BeanFactory;
 import com.minis.beans.factory.config.BeanDefinition;
 import com.minis.beans.factory.config.BeanPostProcessor;
 import com.minis.beans.factory.config.ConstructorArgumentValue;
@@ -17,12 +17,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements BeanFactory, BeanDefinitionRegistry {
+import static com.minis.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
+import static com.minis.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON;
 
-    private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>();
+public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements BeanFactory, BeanDefinitionRegistry, AutowireCapableBeanFactory {
+
+    protected final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>();
     // 初始化实例缓存
-    private final Map<String, Object> earlySingletonObjects = new ConcurrentHashMap<>();
-    private final List<String> beanDefinitionNames = new ArrayList<>();
+    protected final Map<String, Object> earlySingletonObjects = new ConcurrentHashMap<>();
+    protected final List<String> beanDefinitionNames = new ArrayList<>();
 
     protected abstract List<? extends BeanPostProcessor> getBeanPostProcessors();
 
@@ -36,34 +39,23 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
                 // 若初始化实例没有值, 则准备创建
                 BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
                 singleton = createBean(beanDefinition);
+                // 注册到bean缓存中, 至此, 完整的bean对象已经构建成功
                 registerSingleton(beanName, singleton);
-                // 预留bean post processor位置
-                // step 1: postProcessBeforeInitialization
-                applyBeanPostProcessorBeforeInitialization(singleton, beanName);
 
-                // step 2: init-method
+                // 1. postProcessBeforeInitialization
+                applyBeanPostProcessorsBeforeInitialization(singleton, beanName);
+
+                // 2. init-method
                 invokeInitMethod(beanDefinition, singleton);
 
-                // step 3: afterPropertiesSet
+                // 3. afterPropertiesSet
 
-                // step 4: postProcessAfterInitialization
-                applyBeanPostProcessorAfterInitialization(singleton, beanName);
+                // 4. postProcessAfterInitialization
+                applyBeanPostProcessorsAfterInitialization(singleton, beanName);
             }
         }
 
         return singleton;
-    }
-
-    protected Object applyBeanPostProcessorAfterInitialization(Object singleton, String beanName) {
-        for (BeanPostProcessor beanProcessor : getBeanPostProcessors()) {
-            beanProcessor.setBeanFactory(this);
-            singleton = beanProcessor.postProcessAfterInitialization(singleton, beanName);
-            if (singleton == null) {
-                return null;
-            }
-        }
-        return singleton;
-
     }
 
     /**
@@ -86,18 +78,6 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
     }
 
 
-    private Object applyBeanPostProcessorBeforeInitialization(Object singleton, String beanName) {
-        for (BeanPostProcessor beanProcessor : getBeanPostProcessors()) {
-            beanProcessor.setBeanFactory(this);
-            singleton = beanProcessor.postProcessBeforeInitialization(singleton, beanName);
-            if (singleton == null) {
-                return null;
-            }
-        }
-        return singleton;
-    }
-
-
     @Override
     public boolean containsBean(String name) {
         return containsSingleton(name);
@@ -111,13 +91,13 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
     @Override
     public boolean isSingleton(String beanName) {
         BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
-        return Objects.equals(BeanDefinition.SCOPE_SINGLETON, beanDefinition.getScope());
+        return Objects.equals(SCOPE_SINGLETON, beanDefinition.getScope());
     }
 
     @Override
     public boolean isPrototype(String beanName) {
         BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
-        return Objects.equals(BeanDefinition.SCOPE_PROTOTYPE, beanDefinition.getScope());
+        return Objects.equals(SCOPE_PROTOTYPE, beanDefinition.getScope());
     }
 
     @Override

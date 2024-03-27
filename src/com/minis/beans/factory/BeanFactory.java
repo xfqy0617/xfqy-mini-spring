@@ -1,7 +1,10 @@
-package com.minis.beans;
+package com.minis.beans.factory;
 
 import com.minis.exception.BeansException;
 
+/**
+ * bean工厂
+ */
 public interface BeanFactory {
 
     Object getBean(String beanName) throws BeansException;
