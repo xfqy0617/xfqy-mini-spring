@@ -7,7 +7,7 @@
     </bean>
 
     <bean id="baseService" class="com.test.BaseService">
-        <property type="com.test.BaseBaseService" name="baseBaseService" ref="baseBaseService" />
+<!--        <property type="com.test.BaseBaseService" name="baseBaseService" ref="baseBaseService" />-->
     </bean>
 
     <bean id="aService" class="com.test.AServiceImpl">

@@ -62,7 +62,7 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
         // 注册bean后置处理器
         registerBeanPostProcessors(getBeanFactory());
 
-        // 初始化时间发布者
+        // 初始化事件发布者
         initApplicationEventPublisher();
 
         // 刷新IOC容器中的bean

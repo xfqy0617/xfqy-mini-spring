@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) throws BeansException {
-        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("beans.xml", false);
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("beans.xml", true);
         openThread(context);
         AServiceImpl aService = (AServiceImpl) context.getBean("aService");
         aService.sayHello();

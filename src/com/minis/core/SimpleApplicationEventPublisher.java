@@ -15,6 +15,7 @@ public class SimpleApplicationEventPublisher implements ApplicationEventPublishe
 
     @Override
     public void publishEvent(ApplicationEvent event) {
+        // 将一个事件推送给订阅该发布者的所有监听器
         for (ApplicationListener listener : listeners) {
             listener.onApplicationEvent(event);
         }

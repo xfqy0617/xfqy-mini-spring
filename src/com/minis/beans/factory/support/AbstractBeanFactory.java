@@ -33,12 +33,13 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
                 BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
                 singleton = createBean(beanDefinition);
                 // 注册到bean缓存中, 至此, 完整的bean对象已经构建成功
+                // todo ddd 是吗? 注解注入还没生效
                 registerSingleton(beanName, singleton);
 
                 // 1. postProcessBeforeInitialization
                 applyBeanPostProcessorsBeforeInitialization(singleton, beanName);
 
-                // 2. init-method
+                // 2. init-method 这个方法到底是要干啥
                 invokeInitMethod(beanDefinition, singleton);
 
                 // 3. afterPropertiesSet
@@ -130,7 +131,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
     private Object createBean(BeanDefinition bd) {
         Class<?> clz = null;
         // 添加基础bean到缓存中
-        Object obj = doCreateBean(bd);
+        Object obj = constructBean(bd);
         earlySingletonObjects.put(bd.getBeanName(), obj);
         try {
             clz = Class.forName(bd.getClassName());
@@ -149,7 +150,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
     }
 
 
-    private Object doCreateBean(BeanDefinition bd) {
+    private Object constructBean(BeanDefinition bd) {
         Constructor<?> constructor;
         Object obj = null;
         try {

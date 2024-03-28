@@ -54,6 +54,8 @@ public class ClassPathXmlApplicationContext extends AbstractApplicationContext {
 
 	@Override
 	void postProcessBeanFactory(ConfigurableListableBeanFactory bf) {
+
+
 	}
 
 	@Override
@@ -79,7 +81,7 @@ public class ClassPathXmlApplicationContext extends AbstractApplicationContext {
 
 	@Override
 	void finishRefresh() {
-		publishEvent(new ContextRefreshEvent("Context Refreshed..."));
+		publishEvent(new ContextRefreshEvent("IOC上下文初始化完成 ... ..."));
 	}
 
 	@Override

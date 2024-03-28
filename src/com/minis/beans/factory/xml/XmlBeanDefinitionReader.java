@@ -70,9 +70,4 @@ public class XmlBeanDefinitionReader {
             beanFactory.registerBeanDefinition(beanDefinition);
         }
     }
-
-    private void onRefresh() {
-        beanFactory.refresh();
-    }
-
 }
